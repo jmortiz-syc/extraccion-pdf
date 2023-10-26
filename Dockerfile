@@ -51,8 +51,5 @@ COPY --chown=1000:0 . .
 # Navigate to the directory containing the API
 WORKDIR "$WORK_DIR/api"
 
-# Set environment variable for the virtual environment
-ENV VIRTUAL_ENV=$VENV_PATH
-
 # launch api
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-config", "./logging.conf"]
+CMD ["/home/iasyc/venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-config", "./logging.conf"]
