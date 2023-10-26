@@ -30,23 +30,16 @@ ENV PATH="$VENV_PATH/bin:$PATH"
 RUN apt update && apt install --no-install-recommends -y python3.10 python3.10-venv && \
     apt clean && rm -rf /var/lib/apt/lists/*
 
-# Create a group and user, set permissions so that the root group has access
-RUN groupadd -g 1000 iasyc && useradd -m -u 1000 -g iasyc iasyc
 # Copy the virtual environment over from the builder stage
-COPY --from=builder-image --chown=1000:0 $VENV_PATH $VENV_PATH
+COPY --from=builder-image $VENV_PATH $VENV_PATH
 
-RUN mkdir -p $WORK_DIR && \
-    chown -R 1000:0 $WORK_DIR && chmod -R g=u $WORK_DIR $VENV_PATH
-
-# Switch to the non-root user
-USER 1000
+RUN mkdir -p $WORK_DIR
 
 # Set the working directory
 WORKDIR $WORK_DIR
 
 # Copy the application files to the container with correct ownership
-COPY --chown=1000:0 . .
-RUN chmod -R g=u $WORK_DIR
+COPY  . .
 
 # Navigate to the directory containing the API
 WORKDIR "$WORK_DIR/api"
