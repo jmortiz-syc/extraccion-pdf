@@ -52,4 +52,4 @@ RUN chmod -R g=u $WORK_DIR
 WORKDIR "$WORK_DIR/api"
 
 # launch api
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-config", "./logging.conf"]
+CMD ["/home/iasyc/venv/bin/python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-config", "./logging.conf"]
