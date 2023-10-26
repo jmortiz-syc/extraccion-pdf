@@ -21,28 +21,38 @@ RUN pip install --no-cache-dir -r requirements.txt
 # runner image
 FROM ubuntu:22.04 AS runner-image
 
+# Arguments and environment variables for the runner image
 ARG VENV_PATH=/home/iasyc/venv
-ARG WORK_DIR=/home/iasyc/eco_rutas_procesos
+ARG WORK_DIR=/home/iasyc/extraccion_pdf
+ENV PATH="$VENV_PATH/bin:$PATH"
 
-RUN apt update && apt install --no-install-recommends -y python3.10 python3.10-venv tzdata && \
+# Install runtime dependencies
+RUN apt update && apt install --no-install-recommends -y python3.10 python3.10-venv && \
     apt clean && rm -rf /var/lib/apt/lists/*
 
-# set correct timezone
-RUN ln -fs /usr/share/zoneinfo/America/Bogota /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata
+# Create a group and user, set permissions so that the root group has access
+RUN groupadd -g 1000 iasyc && useradd -m -u 1000 -g iasyc iasyc
+# Copy the virtual environment over from the builder stage
+COPY --from=builder-image --chown=1000:0 $VENV_PATH $VENV_PATH
 
-RUN useradd --create-home iasyc
-COPY --from=builder-image $VENV_PATH $VENV_PATH
+RUN mkdir -p $WORK_DIR && \
+    chown -R 1000:0 $WORK_DIR && chmod -R g=u $WORK_DIR $VENV_PATH
 
-# activate virtual environment
-ENV VIRTUAL_ENV=$VENV_PATH
-ENV PATH="$PATH:$VENV_PATH/bin:$WORK_DIR/api"
-RUN echo $PATH
 
-USER iasyc
+# Switch to the non-root user
+USER 1000
+
+# Set the working directory
 WORKDIR $WORK_DIR
-COPY --chown=1000:1000 . .
+
+# Copy the application files to the container with correct ownership
+COPY --chown=1000:0 . .
+
+# Navigate to the directory containing the API
 WORKDIR "$WORK_DIR/api"
+
+# Set environment variable for the virtual environment
+ENV VIRTUAL_ENV=$VENV_PATH
 
 # launch api
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-config", "./logging.conf"]
