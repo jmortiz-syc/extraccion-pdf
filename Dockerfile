@@ -38,7 +38,6 @@ COPY --from=builder-image --chown=1000:0 $VENV_PATH $VENV_PATH
 RUN mkdir -p $WORK_DIR && \
     chown -R 1000:0 $WORK_DIR && chmod -R g=u $WORK_DIR $VENV_PATH
 
-
 # Switch to the non-root user
 USER 1000
 
@@ -47,9 +46,10 @@ WORKDIR $WORK_DIR
 
 # Copy the application files to the container with correct ownership
 COPY --chown=1000:0 . .
+RUN chmod -R g=u $WORK_DIR
 
 # Navigate to the directory containing the API
 WORKDIR "$WORK_DIR/api"
 
 # launch api
-CMD ["/home/iasyc/venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-config", "./logging.conf"]
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-config", "./logging.conf"]
