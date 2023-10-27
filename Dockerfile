@@ -45,4 +45,4 @@ COPY  . .
 WORKDIR "$WORK_DIR/api"
 
 # launch api
-CMD ["/home/iasyc/venv/bin/python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-config", "./logging.conf"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--log-config", "./logging.conf"]
